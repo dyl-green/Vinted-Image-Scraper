@@ -18,8 +18,10 @@ url = "https://www.vinted.com/member/256710934"
 
 url = "https://www.vinted.com/items/9176775363-vintage-nike-track-pants-large-navy-blue-baggy-lined-y2k-grunge-skater"
 
+
+item = 1
 with sync_playwright() as p:
-    browser = p.chromium.launch(headless=False)
+    browser = p.chromium.launch(headless=True)
     page = browser.new_page()
     page.goto(url)
 
@@ -32,8 +34,27 @@ with sync_playwright() as p:
     page.wait_for_timeout(2000) # Give the page time to load
 
     html = page.content()
+
+    soup = BeautifulSoup(html, 'html.parser')
+
+    images = soup.find_all('img', class_="image-carousel__image")
+    image_count = 0
+    for img in images:
+
+        image_count += 1
+        current_image = img['src']
+
+        response = page.request.get(current_image)
+        
+        if response.status == 200:
+            # Write the image bytes directly to a local file
+            save_path = f"image_{item}_{image_count}.jpg"
+            with open(save_path, "wb") as file:
+                file.write(response.body())
+            print(f"Success: Saved image to {save_path}")
+        else:
+            print(f"Failed to fetch image. Status code: {response.status}")
+            
+    #extract_item_info(soup)
     browser.close()
-
-soup = BeautifulSoup(html, 'html.parser')
-
-extract_item_info(soup)
+    
