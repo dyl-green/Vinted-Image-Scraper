@@ -9,18 +9,30 @@ with sync_playwright() as p:
     page.goto(url)
 
     page.wait_for_timeout(2000) # Give the page time to load
+    # Scoll down to load all items, I want to fins a better way fpr this eventually
+    # For now, I'll use a simple scroll approach
+
+    page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+    page.wait_for_timeout(2000) # Give the page time to load the new items
+    page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+    page.wait_for_timeout(2000) # Give the page time to load the new items
+    page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+    page.wait_for_timeout(2000) # Give the page time to load the new items  
+    page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+    page.wait_for_timeout(2000) # Give the page time to load the new items  
+
 
     
+
     html = page.content()
     soup = BeautifulSoup(html, 'html.parser')
 
-    # Scoll down to load all items
 
     # Find all items using <a> tags & class selector
     items = soup.find_all('a', class_="new-item-box__overlay new-item-box__overlay--clickable")
 
 
-    item_urls = [item['href'] + item['title'] for item in items]
+    item_urls = [item['title'][0] for item in items]
     print(item_urls)
 
     # Concatonate the names of the items for the url string 
